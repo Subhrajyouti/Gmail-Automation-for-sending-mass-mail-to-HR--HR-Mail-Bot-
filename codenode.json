@@ -1,0 +1,67 @@
+// Log input for debugging
+console.log("Input items:", items);
+
+// Access the companies JSON text from the body (key is an empty string)
+const companiesText = items[0].json.body[""];
+
+// Parse the JSON string to get the companies object
+let companiesData;
+try {
+  companiesData = JSON.parse(companiesText);
+} catch (error) {
+  throw new Error("Failed to parse companies JSON: " + error.message);
+}
+
+// Validate that companiesData.companies exists and is an array
+if (!companiesData.companies || !Array.isArray(companiesData.companies)) {
+  throw new Error("Expected companiesData.companies to be an array.");
+}
+
+// Retrieve the resume file from the binary property
+const resumeFile = items[0].binary.Subhrajyoti_Mahanta_resume0;
+
+// Define the email template with placeholders
+const emailTemplate = `
+Dear Hiring Team at {{company}},
+
+I hope this email finds you well. I am writing to express my interest in the Data Analyst position at {{company}} ({{office}} office). With hands-on experience in data analysis, visualization, and statistical modeling, I am confident that my expertise aligns well with the role.
+
+Currently, I am working with DST-SERB, Govt. of India at IIEST, Shipbur under Dr. Anuj Kishor Budhkar. In this role, I designed a 6-LIDAR sensor assembly integrated with Vbox data using OpenCV, achieving precise intra-vehicular gap measurements (±2 cm accuracy). Additionally, I optimized raw sensor data and conducted comprehensive data visualization using Tableau, analyzing the impact of electric vehicles (EVs) in real-world traffic scenarios.
+
+Previously, at IIT Guwahati as a Lidar Data Analyst, I cleaned and analyzed over 100 GB of traffic data collected via LIDAR and image processing tools. I also calibrated LIDAR data, achieving a 90% accuracy rate in lateral vehicle velocity computation.
+
+Some of my key projects include:
+- *GoodCabs Performance Analysis:* Developed an interactive Power BI dashboard analyzing 500,000+ trips, leading to strategic revenue insights.
+- *Data Analyst Job Market Insights:* Analyzed 10,000+ job postings, revealing key salary trends and in-demand skills.
+- *SQL-Based Market Expansion Analysis:* Conducted SQL-driven analysis of 100,000+ records to determine optimal expansion cities for a coffee chain, improving decision-making efficiency by 30%.
+
+My expertise spans SQL, Python, R, PostgreSQL, Power BI, MS Excel, Tableau, Pandas, and NumPy, backed by certifications in SQL, Python, and Excel for Data Analytics.
+
+I have attached my resume for your review. I welcome the opportunity to discuss how my skills and experience can contribute to {{company}}. Please feel free to reach out at your convenience.
+
+Best Regards,  
+Subhrajyoti Mahanta  
+[Your Contact Information]
+`;
+
+// Process each company and create an output item with the modified email body and attached resume
+const outputItems = companiesData.companies.map(companyItem => {
+  return {
+    json: {
+      company: companyItem.company,
+      office: companyItem.office,
+      email: companyItem.email,
+      emailBody: emailTemplate
+                   .replace(/{{company}}/g, companyItem.company)
+                   .replace(/{{office}}/g, companyItem.office)
+    },
+    binary: {
+      Subhrajyoti_Mahanta_resume0: resumeFile // Ensure the resume file is included in the output
+    }
+  };
+});
+
+// Log output for debugging
+console.log("Output items:", outputItems);
+
+return outputItems;
